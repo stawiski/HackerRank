@@ -41,15 +41,15 @@ char**** get_document(char* text)
 
 	/* Preallocate the document's pointers. */
 	document = malloc(sizeof(char****));
-	document[0] = malloc(sizeof(char***));
-	document[0][0] = malloc(sizeof(char**));
-	document[0][0][0] = malloc(sizeof(char*));
+	document[iParagraphs] = malloc(sizeof(char***));
+	document[iParagraphs][iSentences] = malloc(sizeof(char**));
+	document[iParagraphs][iSentences][iWords] = malloc(sizeof(char*));
 
 	i = 0;
 
 	/* Loop until termination character. */
 	while ((c = text[i++])) {
-		/* Check if character belongs to a-z or A-Z. */
+		/* Check if the character belongs to a-z or A-Z. */
 		if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
 			iChars++;
 
@@ -57,63 +57,48 @@ char**** get_document(char* text)
 			word[iChars - 1] = c; /* Put the new character. */
 			word[iChars] = 0; /* Terminate the word string. */
 		} else
-		/* Got a space, so the word is finished. */
-		if (c == ' ') {
-			DEBUG_PRINTF("Next word. Word = %s. Index of: Chars = %d, Words = %d, Sentences = %d, Paragraphs = %d.\r\n", word, iChars, iWords, iSentences, iParagraphs);
+		/* Check if the character belongs to special expected characters that always finish the word. */
+		if ((c == ' ') || (c == '.') || (c == '\n')) {
 
 			/* Check if there are characters in a word. */
 			if (iChars) {
 				/* Reallocate the memory for the word. */
 				document[iParagraphs][iSentences][iWords] = realloc(document[iParagraphs][iSentences][iWords], (iChars + 1) * sizeof(char));
-				iChars = 0;
 				/* Put the word in it's place. */
 				strcpy(document[iParagraphs][iSentences][iWords], word);
-			}
-
-			iWords++;
-			document[iParagraphs][iSentences] = realloc(document[iParagraphs][iSentences], (iWords + 1)*sizeof(char*)); /* Make space for next pointer to a string (word). */
-			document[iParagraphs][iSentences][iWords] = NULL; /* Initialize word to NULL. */
-		} else
-		/* Got a dot, so the sentence is finished. */
-		if (c == '.') {
-			DEBUG_PRINTF("Next sentence. Word = %s. Index of: Chars = %d, Words = %d, Sentences = %d, Paragraphs = %d.\r\n", word, iChars, iWords, iSentences, iParagraphs);
-
-			/* Check if there are characters in a word. */
-			if (iChars) {
-				/* Reallocate the memory for the word. */
-				document[iParagraphs][iSentences][iWords] = realloc(document[iParagraphs][iSentences][iWords], (iChars + 1) * sizeof(char));
+				/* Reset character counter. */
 				iChars = 0;
-				/* Put the word in it's place. */
-				strcpy(document[iParagraphs][iSentences][iWords], word);
 			}
 
-			iWords = 0;
-			iSentences++;
-			document[iParagraphs] = realloc(document[iParagraphs], (iSentences + 1) * sizeof(char**)); /* Make space for next pointer to a sentence. */
-			document[iParagraphs][iSentences] = malloc(sizeof(char**)); /* Make space for next pointer to a string (word). */
-			document[iParagraphs][iSentences][0] = NULL; /* Initialize word to NULL. */
-		} else
-		/* Got a new line, so the paragraph is finished. */
-		if (c == '\n') {
-			DEBUG_PRINTF("Next paragraph. Word = %s. Index of: Chars = %d, Words = %d, Sentences = %d, Paragraphs = %d.\r\n", word, iChars, iWords, iSentences, iParagraphs);
-			
-			/* Check if there are characters in a word. */
-			if (iChars) {
-				/* Reallocate the memory for the word. */
-				document[iParagraphs][iSentences][iWords] = realloc(document[iParagraphs][iSentences][iWords], (iChars + 1) * sizeof(char));
-				iChars = 0;
-				/* Put the word in it's place. */
-				strcpy(document[iParagraphs][iSentences][iWords], word);
+			/* Got a space, so the word is finished. */
+			if (c == ' ') {
+				DEBUG_PRINTF("Next word. Word = %s. Index of: Chars = %d, Words = %d, Sentences = %d, Paragraphs = %d.\r\n", word, iChars, iWords, iSentences, iParagraphs);
+	  			iWords++;
+				document[iParagraphs][iSentences] = realloc(document[iParagraphs][iSentences], (iWords + 1)*sizeof(char*)); /* Make space for next pointer to a string (word). */
+				document[iParagraphs][iSentences][iWords] = NULL; /* Initialize word to NULL. */
+			} else
+			/* Got a dot, so the sentence is finished. */
+			if (c == '.') {
+				DEBUG_PRINTF("Next sentence. Word = %s. Index of: Chars = %d, Words = %d, Sentences = %d, Paragraphs = %d.\r\n", word, iChars, iWords, iSentences, iParagraphs);
+				iWords = 0;
+				iSentences++;
+				document[iParagraphs] = realloc(document[iParagraphs], (iSentences + 1) * sizeof(char**)); /* Make space for next pointer to a sentence. */
+				document[iParagraphs][iSentences] = malloc(sizeof(char**)); /* Make space for next pointer to a string (word). */
+				document[iParagraphs][iSentences][iWords] = NULL; /* Initialize word to NULL. */
+			} else
+			/* Got a new line, so the paragraph is finished. */
+			if (c == '\n') {
+				DEBUG_PRINTF("Next paragraph. Word = %s. Index of: Chars = %d, Words = %d, Sentences = %d, Paragraphs = %d.\r\n", word, iChars, iWords, iSentences, iParagraphs);
+				iWords = 0;
+				iSentences = 0;
+				iParagraphs++;
+				document = realloc(document, (iParagraphs + 1) * sizeof(char****)); /* Make space for next pointer to a paragraph. */
+				document[iParagraphs] = malloc(sizeof(char***)); /* Make space for next pointer to a sentence. */
+				document[iParagraphs][iSentences] = malloc(sizeof(char**)); /* Make space for next pointer to a string (word). */
+				document[iParagraphs][iSentences][iWords] = NULL; /* Initialize word to NULL. */
 			}
-
-			iWords = 0;
-			iSentences = 0;
-			iParagraphs++;
-			document = realloc(document, (iParagraphs + 1) * sizeof(char****)); /* Make space for next pointer to a paragraph. */
-			document[iParagraphs] = malloc(sizeof(char***)); /* Make space for next pointer to a sentence. */
-			document[iParagraphs][0] = malloc(sizeof(char**)); /* Make space for next pointer to a string (word). */
-			document[iParagraphs][0][0] = NULL; /* Initialize word to NULL. */
 		} else
+		/* Unexpected character. */
 		{
 			DEBUG_PRINTF("\r\n");
 		}
