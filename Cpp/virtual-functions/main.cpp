@@ -7,60 +7,67 @@ using namespace std;
 
 class Person {
     public:
-        virtual void getdata() {}
-        virtual void putdata() {}
+        virtual void getdata() {
+            cin >> name;
+            cin >> age;
+        }
+        virtual void putdata() {
+           cout << name << " " << age << " ";
+        }
     protected:
         string name;
         int age;
 };
 
 class Professor: public Person {
-   public:
-      Professor() {
-         /* Increase unique id and assign it to current id. */
-         this->cur_id = ++this->id;
-      }
-      void getdata() {
-         cin >> name;
-         cin >> age;
-         cin >> publications;
-      }
-      void putdata() {
-         cout << name << " " << age << " " << publications << " " << cur_id << endl;
-      }
-   protected:
-      int publications;
-      int cur_id;
-   private:
-      static int id;
+    public:
+        Professor() {
+            /* Increase unique id and assign it to current id. */
+            this->cur_id = ++this->id;
+        }
+        void getdata() {
+            Person::getdata();
+            cin >> publications;
+        }
+        void putdata() {
+            Person::putdata();
+            cout << publications << " " << cur_id << endl;
+        }
+    protected:
+        int publications;
+        int cur_id;
+    private:
+        static int id;
 };
 
 int Professor::id = 0;
 
 class Student: public Person {
-   public:
-      Student() {
-         /* Increase unique id and assign it to current id. */
-         this->cur_id = ++this->id;
-      }
-      void getdata() {
-         marksSum = 0;
-         cin >> name;
-         cin >> age;
-         for (int i = 0; i < 6; i++) {
-               cin >> marks[i];
-               marksSum += marks[i];
-         }
-      }
-      void putdata() {
-         cout << name << " " << age << " " << marksSum << " " << cur_id << endl;
-      }
-   protected:
-      int marks[6];
-      int marksSum;
-      int cur_id;
-   private:
-      static int id;
+    public:
+        Student() {
+            /* Increase unique id and assign it to current id. */
+            this->cur_id = ++this->id;
+        }
+        void getdata() {
+            Person::getdata();
+            marksSum = 0;
+            /* Loop through 6 marks. */
+            for (int i = 0; i < 6; i++) {
+                cin >> marks[i];
+                /* Calculate mark sum. */
+                marksSum += marks[i];
+            }
+        }
+        void putdata() {
+            Person::putdata();
+            cout << marksSum << " " << cur_id << endl;
+        }
+    protected:
+        int marks[6];
+        int marksSum;
+        int cur_id;
+    private:
+        static int id;
 };
 
 int Student::id = 0;
